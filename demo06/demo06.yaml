@@ -1,0 +1,32 @@
+# ACI playbook - Demo 06 - Query Development Tenant Faults
+---
+- name: Query Development Tenant
+  hosts: apic
+  connection: local
+  gather_facts: no
+
+  vars:
+    aci_login: &aci_login
+      host: "{{ ansible_host }}"
+      username: "{{ aci_username }}"
+      password: "{{ aci_password | default(omit) }}"
+      private_key: "{{ aci_private_key | default(omit) }}"
+      certificate_name: "{{ aci_certificate_name | default(omit) }}"
+      validate_certs: "{{ aci_validate_certs }}"
+
+  vars_files:
+    - ../dev_tn_variables.yaml
+
+  tasks:
+    - name: "Get Faults"
+      cisco.aci.aci_rest:
+        <<: *aci_login
+        method: get
+        path: "/api/class/faultInst.json?query-target-filter=wcard(faultInst.dn,\"uni/tn-{{ tenant_name }}\")"
+      register: faults
+
+    - name: "Verify Faults"
+      assert:
+        that: faults.totalCount == 0
+        fail_msg: "FAIL: There are {{ faults.totalCount }} faults raised"
+        success_msg: "SUCCESS: There are no faults raised"

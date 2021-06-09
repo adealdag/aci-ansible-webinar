@@ -1,0 +1,6 @@
+# ACI playbook - Demo 05 - Create Development Tenant - Both Networking and App
+---
+
+- import_playbook: demo05_net.yaml
+- import_playbook: demo05_app.yaml
+

@@ -1,0 +1,67 @@
+# ACI playbook - Demo 02 - Create Development Tenant
+# Adding variables
+---
+- name: Create Development Tenant
+  hosts: apic
+  connection: local
+  gather_facts: no
+
+  vars_files:
+    - ../dev_tn_variables.yaml
+
+  tasks:
+    - name: Add Development Tenant
+      cisco.aci.aci_tenant:
+        host: "{{ ansible_host }}"
+        username: "{{ aci_username }}"
+        password: "{{ aci_password }}"
+        validate_certs: "{{ aci_validate_certs }}"
+        tenant: "{{ tenant_name }}"
+        state: present
+
+    - name: Add Development VRF
+      cisco.aci.aci_vrf:
+        host: "{{ ansible_host }}"
+        username: "{{ aci_username }}"
+        password: "{{ aci_password }}"
+        validate_certs: "{{ aci_validate_certs }}"
+        vrf: "{{ vrf_name }}"
+        tenant: "{{ tenant_name }}"
+        policy_control_preference: enforced
+        policy_control_direction: ingress
+        state: present
+
+    - name: Add Bridge Domain
+      cisco.aci.aci_bd:
+        host: "{{ ansible_host }}"
+        username: "{{ aci_username }}"
+        password: "{{ aci_password }}"
+        validate_certs: "{{ aci_validate_certs }}"
+        tenant: "{{ tenant_name }}"
+        bd: 192.168.1.0_24_bd
+        vrf: "{{ vrf_name }}"
+        state: present
+
+    - name: Create a subnet
+      cisco.aci.aci_bd_subnet:
+        host: "{{ ansible_host }}"
+        username: "{{ aci_username }}"
+        password: "{{ aci_password }}"
+        validate_certs: "{{ aci_validate_certs }}"
+        tenant: "{{ tenant_name }}"
+        bd: 192.168.1.0_24_bd
+        gateway: 192.168.1.1
+        mask: 24
+        scope: [public]
+        state: present
+
+    - name: Bind bridge domain to Core L3Out
+      cisco.aci.aci_bd_to_l3out:
+        host: "{{ ansible_host }}"
+        username: "{{ aci_username }}"
+        password: "{{ aci_password }}"
+        validate_certs: "{{ aci_validate_certs }}"
+        tenant: "{{ tenant_name }}"
+        bd: 192.168.1.0_24_bd
+        l3out: "{{ l3out_name }}"
+        state: present

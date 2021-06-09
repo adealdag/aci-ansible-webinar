@@ -1,0 +1,68 @@
+# ACI playbook - Demo 03 - Create Development Tenant
+# Loops and anchors
+---
+- name: Create Development Tenant
+  hosts: apic
+  connection: local
+  gather_facts: no
+
+  vars:
+    aci_login: &aci_login
+      host: "{{ ansible_host }}"
+      username: "{{ aci_username }}"
+      password: "{{ aci_password }}"
+      validate_certs: "{{ aci_validate_certs }}"
+      annotation: "orchestrator:ansible"
+
+  vars_files:
+    - ../dev_tn_variables.yaml
+
+  tasks:
+    - name: Add Development Tenant
+      cisco.aci.aci_tenant:
+        <<: *aci_login
+        tenant: "{{ tenant_name }}"
+        state: present
+
+    - name: Add Development VRF
+      cisco.aci.aci_vrf:
+        <<: *aci_login
+        vrf: "{{ vrf_name }}"
+        tenant: "{{ tenant_name }}"
+        policy_control_preference: enforced
+        policy_control_direction: ingress
+        state: present
+
+    - name: Add Bridge Domain
+      cisco.aci.aci_bd:
+        <<: *aci_login
+        tenant: "{{ tenant_name }}"
+        bd: "{{ item.name }}"
+        vrf: "{{ vrf_name }}"
+        l2_unknown_unicast: "{{ 'proxy' if (item.mode == 'L3') else 'flood' }}"
+        arp_flooding: yes
+        enable_routing: "{{ 'yes' if (item.mode == 'L3') else 'no' }}"
+        state: present
+      loop: "{{ bridge_domains }}"
+
+    - name: Create a subnet
+      cisco.aci.aci_bd_subnet:
+        <<: *aci_login
+        tenant: "{{ tenant_name }}"
+        bd: "{{ item.name }}"
+        gateway: "{{ item.gateway.split('/')[0] }}"
+        mask: "{{ item.gateway.split('/')[1] }}"
+        scope:  "{{ item.scope }}"
+        state: present
+      loop: "{{ bridge_domains }}"
+      when: item.mode == 'L3'
+
+    - name: Bind bridge domain to Core L3Out
+      cisco.aci.aci_bd_to_l3out:
+        <<: *aci_login
+        tenant: "{{ tenant_name }}"
+        bd: "{{ item.name }}"
+        l3out: "{{ l3out_name }}"
+        state: present
+      loop: "{{ bridge_domains }}"
+      when: item.mode == 'L3'

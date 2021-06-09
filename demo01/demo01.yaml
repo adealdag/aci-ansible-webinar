@@ -1,0 +1,68 @@
+# ACI playbook - Demo 01 - Create Development Tenant
+# First playbook using documentation examples
+---
+- name: Create Development Tenant
+  hosts: apic
+  gather_facts: no
+
+  tasks:
+    - name: Add Development Tenant
+      cisco.aci.aci_tenant:
+        host: apic-ams.cisco.com
+        username: orchestrator
+        password: # Include your password here
+        validate_certs: no
+        tenant: development_tn
+        state: present
+      delegate_to: localhost
+
+    - name: Add Development VRF
+      cisco.aci.aci_vrf:
+        host: apic-ams.cisco.com
+        username: orchestrator
+        password: # Include your password here
+        validate_certs: no
+        vrf: dev_vrf
+        tenant: development_tn
+        policy_control_preference: enforced
+        policy_control_direction: ingress
+        state: present
+      delegate_to: localhost
+
+    - name: Add Bridge Domain
+      cisco.aci.aci_bd:
+        host: apic-ams.cisco.com
+        username: orchestrator
+        password: # Include your password here
+        validate_certs: no
+        tenant: development_tn
+        bd: 192.168.1.0_24_bd
+        vrf: dev_vrf
+        state: present
+      delegate_to: localhost
+
+    - name: Create a subnet
+      cisco.aci.aci_bd_subnet:
+        host: apic-ams.cisco.com
+        username: orchestrator
+        password: # Include your password here
+        validate_certs: no
+        tenant: development_tn
+        bd: 192.168.1.0_24_bd
+        gateway: 192.168.1.1
+        mask: 24
+        scope: [public]
+        state: present
+      delegate_to: localhost
+
+    - name: Bind bridge domain to Core L3Out
+      cisco.aci.aci_bd_to_l3out:
+        host: apic-ams.cisco.com
+        username: orchestrator
+        password: # Include your password here
+        validate_certs: no
+        tenant: development_tn
+        bd: 192.168.1.0_24_bd
+        l3out: core_l3out
+        state: present
+      delegate_to: localhost

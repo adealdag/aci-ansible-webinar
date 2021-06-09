@@ -1,0 +1,23 @@
+# ACI playbook - Configure user certificate
+---
+- name: Push x509 certificate to APIC
+  hosts: apic
+  connection: local
+  gather_facts: no
+
+  vars_prompt:
+    - name: admin_password
+      prompt: Please enter admin password
+      private: yes
+
+  tasks:
+    - name: Add a certificate to user
+      cisco.aci.aci_aaa_user_certificate:
+        host: "{{ ansible_host }}"
+        username: admin
+        password: "{{ admin_password }}"
+        validate_certs: "{{ aci_validate_certs }}"
+        aaa_user: "{{ aci_username }}"
+        certificate_name: labadmin.crt
+        certificate: '{{ lookup("file", "../pki/labadmin.crt") }}'
+        state: present

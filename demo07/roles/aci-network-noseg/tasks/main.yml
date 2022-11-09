@@ -1,0 +1,46 @@
+---
+# tasks file for aci-network-noseg
+
+- name: Create network
+
+  vars:
+    aci_login: &aci_login
+      host: "{{ ansible_host }}"
+      username: "{{ aci_username }}"
+      password: "{{ aci_password | default(omit) }}"
+      private_key: "{{ aci_private_key | default(omit) }}"
+      certificate_name: "{{ aci_certificate_name | default(omit) }}"
+      validate_certs: "{{ aci_validate_certs }}"
+
+  block:
+    - name: Add Bridge Domain
+      cisco.aci.aci_bd:
+        <<: *aci_login
+        tenant: "{{ tenant_name }}"
+        bd: "{{ network_name }}"
+        vrf: "{{ vrf_name }}"
+        l2_unknown_unicast: "{{ 'proxy' if (network_type == 'L3') else 'flood' }}"
+        arp_flooding: yes
+        enable_routing: "{{ 'yes' if (network_type == 'L3') else 'no' }}"
+        state: present
+
+    - name: Create a subnet
+      cisco.aci.aci_bd_subnet:
+        <<: *aci_login
+        tenant: "{{ tenant_name }}"
+        bd: "{{ network_name }}"
+        gateway: "{{ subnet.split('/')[0] }}"
+        mask: "{{ subnet.split('/')[1] }}"
+        scope: "{{ ['public'] if public else ['private'] }}"
+        state: present
+      when: network_type == 'L3'
+
+    - name: Add EPG
+      cisco.aci.aci_epg:
+        <<: *aci_login
+        tenant: "{{ tenant_name }}"
+        ap: "{{ app_name }}"
+        epg: "{{ network_name }}"
+        bd: "{{ network_name }}"
+        preferred_group: yes
+        state: present

@@ -1,0 +1,5 @@
+---
+# vars file for aci-network-noseg
+
+network_type: l2
+public: no

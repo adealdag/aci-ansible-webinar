@@ -34,6 +34,9 @@ This demo demonstrate how multiple playbooks can be imported into another playbo
 ### Demo 06
 This demo demonstrate how **aci_rest**  module can be used for posting or querying Cisco ACI REST API when specific modules are not available for a certain class. It also demonstrate how the query option can be used and how the registered variables can be consumed in other tasks in the same playbook.
 
+### Demo 07
+This demo demonstrate how to create and use an **Ansible role** that deploys Cisco ACI configuration. This particular role is a very simple one that deploys a BD, subnet and EPG doing a 1:1 mapping, following a network-centric approach. The playbook contains two different ways of adding roles: the tradditional one (that does not work in this case, as explained in the webinar, and is commented out) and the dynamic reuse way using `include_roles`
+
 ## Instructions
 
 These playbooks has been tested with Ansible 2.9 and Cisco ACI collection 2.0.0.

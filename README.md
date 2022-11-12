@@ -4,7 +4,7 @@ This repository contains a set of different examples of ansible playbooks for au
 
 ## Inventory
 
-Two examples of invertories are provided, both in INI and YAML format. The inventory includes not only APIC but also leaf and spine switches, although those are not used in any of the playbooks provided in this repository.
+Two examples of inventories are provided, both in INI and YAML format. The inventory includes not only APIC but also leaf and spine switches, although those are not used in any of the playbooks provided in this repository.
 
 ## Demos
 
@@ -12,19 +12,19 @@ Two examples of invertories are provided, both in INI and YAML format. The inven
 The simplest example of an Ansible playbook for Cisco ACI, with no variables, no anchors and no flow controls at all.
 
 ### Demo 02
-Building on top of previous demo, this playbook includes variables, which are defined both in inventory and in an external variable file referenced using **vars_files**. 
+Building on top of previous demo, this playbook includes variables, which are defined both in inventory and at the play level using **vars**.
 
-Also, delegate_to: localhost has been replaced by connection: local defined at the playbook level.
+Also, delegate_to: localhost has been replaced by connection: local defined at the play level.
 
 ### Demo 03
 Building on top of previous demo, this playbook uses YAML anchors to avoid repetition of the parameters that are common to all Cisco ACI modules.
 
-This playbook also includes loops to execute plays/tasks multiple times iterating pver a list of bridge domains, as well as conditionals to execute certain plays/tasks only when bridge domain attributes match some specific conditions.
+This playbook also includes loops to execute plays/tasks multiple times iterating over a list of bridge domains, as well as conditionals to execute certain plays/tasks only when bridge domain attributes match some specific conditions. variables are now defined in an external variable file referenced using **vars_files**. 
 
 This playbook also demonstrate how Jinja templating language can be leveraged for some variable processing like in-line conditionals, string manipulations or setting default values.
 
 ### Demo 04
-This demo replaces password-based authentication with certificate=based authentication using X509 certificates. It's included also a playbook that implements pushing the certificate to the APIC for an existing user called "orchestrator".
+This demo replaces password-based authentication with certificate-based authentication using X509 certificates. It's included also a playbook that implements pushing the certificate to the APIC for an existing user called "orchestrator".
 
 ### Demo 05
 Building on top of previous demos, this demo includes an extra playbook that implements an application profile with some EPGs and contracts. The configuration is not complete as it assumes that contract filters are already present in the APIC.
@@ -39,7 +39,7 @@ This demo demonstrate how to create and use an **Ansible role** that deploys Cis
 
 ## Instructions
 
-These playbooks has been tested with Ansible 2.9 and Cisco ACI collection 2.0.0.
+These playbooks has been tested with Ansible 2.10 and Cisco ACI collection 2.0.0.
 
 Cisco ACI ansible collection can be installed using the following command:
 

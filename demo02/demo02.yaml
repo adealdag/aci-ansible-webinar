@@ -6,8 +6,10 @@
   connection: local
   gather_facts: no
 
-  vars_files:
-    - ../dev_tn_variables.yaml
+  vars:
+    tenant_name: development_tn
+    vrf_name: dev_vrf
+    l3out_name: core_l3out
 
   tasks:
     - name: Add Development Tenant
